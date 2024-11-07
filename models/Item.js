@@ -2,11 +2,12 @@ const mongoose = require('mongoose');
 
 // Item Schema and Model
 const itemSchema = new mongoose.Schema({
+    id:{ type: String, required: true, unique: true },
     name: { type: String, required: true },
     status: { type: String },
     amount_paid: { type: Number, required: true },
     comments: { type: String },
-    total_paid: { type: Number, required: true },
+    total_paid: { type: Number, required: true, default: 0 },
     default_amount: { type: Number, required: true },
     balance_due: { type: Number, required: true },
     last_payment: { type: Date, default: Date.now },

@@ -26,33 +26,64 @@ exports.getItems = async (req, res) => {
   }
 };
 
-// POST a new item
-exports.addItem = async (req, res) => {
-  const { name, status, amount_paid, comments, total_paid, default_amount, balance_due, last_payment, number_plate, contact, contract_details } = req.body;
+// Custom findOneAndUpdate function
+exports.findOneAndUpdate = async (id, update, options) => {
+    try {
+        return await Item.findOneAndUpdate({ id }, update, options);
+    } catch (error) {
+        console.error("Error in findOneAndUpdate:", error);
+        throw error;
+    }
+};
 
-  // Basic validation
-  /*if (!name || !status) {
-    return res.status(400).json({ message: 'Name and status are required' });
-  }*/
+
+
+
+/// POST a new item
+exports.addItem = async (req, res) => {
+  const { id, name, status, amount_paid, comments, total_paid, default_amount, balance_due, last_payment, number_plate, contact, contract_details } = req.body;
 
   try {
-    const newItem = new Item({ name, status, amount_paid, comments, total_paid, default_amount, balance_due, last_payment, number_plate, contact, contract_details });
+    // Check if ID is provided and if it already exists in the database
+    if (id) {
+      const existingItem = await Item.findOne({ id });
+      if (existingItem) {
+        return res.status(400).json({ message: `ID ${id} already exists. Please choose a different ID.` });
+      }
+    }
+
+    // Create the new item with the provided details
+    const newItem = new Item({
+      id, // Use provided ID
+      name,
+      status,
+      amount_paid,
+      comments,
+      total_paid,
+      default_amount,
+      balance_due,
+      last_payment,
+      number_plate,
+      contact,
+      contract_details
+    });
+
     await newItem.save();
-    res.status(201).json(newItem);
+    res.status(201).json(newItem); // Return the newly created item
   } catch (err) {
-    console.error(err); // Log the error for debugging
+    console.error(err);
     res.status(500).json({ message: 'Server Error', error: err.message });
   }
 };
 
 // PUT update an item
 exports.updateItem = async (req, res) => {
-  const { name, status, amount_paid, comments, total_paid, default_amount, balance_due, last_payment, number_plate, contact, contract_details } = req.body;
+  const { id, name, status, amount_paid, comments, total_paid, default_amount, balance_due, last_payment, number_plate, contact, contract_details } = req.body;
 
   try {
     const item = await Item.findByIdAndUpdate(
       req.params.id,
-      { name, status, amount_paid, comments, total_paid, default_amount, balance_due, last_payment, number_plate, contact, contract_details },
+      { id, name, status, amount_paid, comments, total_paid, default_amount, balance_due, last_payment, number_plate, contact, contract_details },
       { new: true }
     );
 
